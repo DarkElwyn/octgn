@@ -1,0 +1,118 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<game name="Not Alone"
+    id="af04f855-58c4-4db3-a191-45fe33381991"
+    version="1.1.0.0" 
+    tags="OCTG Not Alone"
+    description="[2-7 joueurs][45min]
+	&#xd;25e siècle, l’Humanité s’est envolée depuis longtemps vers les étoiles. Elle a voyagé aux confins de la galaxie  et pourtant, elle n’a jamais rencontré d’autres formes de vie intelligente. Après l'aterrisage d'urgence de votre expédition sur la planète Artemia, vous entamez l’exploration des environs lorsque vous entendez les cris d’agonie de votre capitaine. Au loin vous distinguez une silhouette qui vous observe. Vous n’êtes pas seul ..."
+    setsurl="https://darkelwyn.github.io/octgn/NotAlone/ico.png" 
+	gameurl="https://darkelwyn.github.io/octgn/NotAlone/"
+    authors="RomElwyn"
+    iconurl="https://darkelwyn.github.io/octgn/NotAlone/ico.png"
+    octgnVersion="3.1.240.0"
+    scriptVersion="3.1.0.2"
+    markersize="30"
+	usetwosidedtable="False"
+    >
+    <scripts>
+	  <script src="Scripts/actions.py" />
+    </scripts>
+    <events>
+		<event name="OnGameStarted" action="setup"/>
+		<event name="OnCounterChanged" action="OnCounterChanged"/>
+		<event name="OnCardsMoved" action="OnCardsMoved"/>
+		<event name="OnPhasePassed" action="OnPhasePassed"/>
+		<event name="OnCardDoubleClicked" action="OnCardDoubleClicked"/>
+	</events>
+    <sounds>
+		<sound name="phase1" src="sounds/phase1.mp3"/>
+		<sound name="phase2" src="sounds/phase2.mp3"/>
+		<sound name="phase3" src="sounds/phase3.mp3"/>
+		<sound name="phase4" src="sounds/phase4.mp3"/>
+		<sound name="finAlien" src="sounds/fin_alien.mp3"/>
+		<sound name="finSecours" src="sounds/fin_humain.mp3"/>
+    </sounds>
+    <fonts>
+    </fonts>
+    <proxygen definitionsrc="Proxies/proxydef.xml">
+    </proxygen>
+	<phases>
+		<phase name="Phase 1" icon="phases/phase1.jpg" />
+		<phase name="Phase 2" icon="phases/phase2.jpg" />
+		<phase name="Phase 3" icon="phases/phase3.jpg" />
+		<phase name="Phase 4" icon="phases/phase4.jpg" />
+	</phases>
+    <documents>
+		<document name="Aide de jeu" icon="" src="documents/aide.pdf" />
+    </documents> 
+    <gameModes>
+    </gameModes>
+    <globalvariables>
+		<globalvariable name="stateBalise" value="Activated" /> 
+		<globalvariable name="rankAssimilation" value="8" /> 
+		<globalvariable name="rankSecours" value="8" /> 
+		<globalvariable name="dateTimeDebut" value="0" /> 
+    </globalvariables>
+    <card back="cards/dos_lieu.jpg" front="cards/dos_lieu.jpg" width="120" height="160" cornerRadius="8">
+		<property name="Type" type="String" />
+		<property name="Proprio" type="String" />
+		
+		<size name="Alien" width="120" height="160" back="cards/dos_alien.jpg" front="cards/dos_alien.jpg" cornerRadius="8"/>
+		<size name="Survie" width="120" height="160" back="cards/dos_survie.jpg" front="cards/dos_survie.jpg" cornerRadius="8"/>
+		<size name="Jeton" width="120" height="120" back="cards/dos_jeton.png" front="cards/dos_jeton.png" cornerRadius="8"/>
+		<size name="Balise" width="40" height="40" back="cards/dos_jeton.png" front="cards/dos_jeton.png" cornerRadius="8"/>
+	</card>
+	<gameboards name="Default" src="Resources/boardA.jpg" x="-340" y="-325" width="1000" height="115">
+		    <gameboard name="PisteB" src="Resources/boardB.jpg" x="-340" y="-325" width="1000" height="115"/>
+	</gameboards>
+    <table name="Table" visibility="undefined" ordered="False" width="1000" height="650" background="Resources/bg_space.jpg" backgroundStyle="uniformToFill">
+		<groupaction menu="Faire de cette endroit ma zone de jeu" execute="setMySpot" />
+		<groupaction menu="Phase Suivante..." shortcut="tab" execute="phaseInc" />
+		<groupaction menu="Son : On/Off" execute="muteSound" />
+		<groupaction menu="Durée" execute="printGameDuration" />
+		
+        <cardaction menu="Retourner" shortcut="ctrl+f" batchExecute="flip" showIf="canFlip" />
+		
+		<cardaction menu="Prendre 1 carte survie" execute="takeOneSurvie" showIf="canDraw1Survie" />
+		<cardaction menu="Prendre 2 cartes survie" execute="takeTwoSurvie" showIf="canDraw2Survie" />
+		
+		<cardaction menu="Balise : Charger" execute="loadBeacon" showIf="canLoadBeacon" />
+		<cardaction menu="Balise : Activer" execute="activateBeacon" showIf="canActivateBeacon" />
+		
+		<cardaction menu="Avancer" execute="increaseAssimilationToken" showIf="canIncreaseAssimilationToken" />
+		<cardaction menu="Reculer" execute="decreaseAssimilationToken" showIf="canDecreaseAssimilationToken" />
+		
+		<cardaction menu="Avancer les secours" execute="increaseSecoursToken" showIf="canIncreaseSecoursToken" />
+		<cardaction menu="Reculer les secours" execute="decreaseSecoursToken" showIf="canDecreaseSecoursToken" />
+    </table>
+   <player summary="PV:{#Volonté} Main:{#Main}">
+	<globalvariable name="ready" value="False" />
+	<globalvariable name="preferAlien" value="False" />
+	<globalvariable name="isAlien" value="False" />
+	<globalvariable name="mySpot" value="[0,0]" />
+	<globalvariable name="isSoundMuted" value="False" />
+	
+    <counter name="Volonté" icon="Resources/heart.png" default="3" />
+    <hand name="Main" shortcut="ctrl+H" visibility="me" ordered="False" icon="Resources/hand.png">
+		<groupaction menu="Jouer une carte lieu aléatoire" execute="playRandomly" showIf="IamNotAlien" />
+		<groupseparator />
+		
+		<groupaction menu="Resister 1 PV" execute="resist" showIf="IamNotAlien" />
+		<groupaction menu="Resister 2 PV" execute="resist2" showIf="IamNotAlien" />
+		<groupaction menu="Lâcher prise" execute="surrender" showIf="IamNotAlien" />
+
+		<cardaction menu="Jouer cette carte fasse cachée" execute="playCard" />
+    </hand>
+    <group name="Pioche" shortcut="ctrl+E" visibility="none"  icon="Resources/deck.png" collapsed="True">
+		<groupaction menu="Mélanger" execute="shuffle" />
+    </group>
+    <group name="Défausse" shortcut="del" visibility="all"  icon="Resources/discard.png" collapsed="True">
+    </group>
+  </player>
+  <shared summary="PV:{#Volonté perdue}">
+	<counter name="Volonté perdue" icon="Resources/heart.png" />
+	<group name="Survies" ordered="True" icon="Resources/deck.png" collapsed="False">
+		<cardaction menu="Prendre 1 carte" execute="takeOneSurvie" />
+	</group>
+  </shared>
+</game>
